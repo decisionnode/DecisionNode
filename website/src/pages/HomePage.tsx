@@ -331,6 +331,13 @@ export default function HomePage() {
                     <div className="grid grid-cols-1 gap-6 max-w-3xl mx-auto">
                         {[
                             {
+                                icon: Eye,
+                                title: 'Web UI — graph, vector space, list',
+                                description: 'Run decide ui to launch a local web interface with three views: a force-directed graph (decisions linked by similarity), a 2D vector space (UMAP projection of the 3072-dim embeddings), and a searchable list. When an MCP client searches, matched nodes pulse live in that client\'s color — watch your AI think in real time.',
+                                color: 'primary',
+                                link: '/docs/cli#web-ui',
+                            },
+                            {
                                 icon: Terminal,
                                 title: 'Agent Behavior',
                                 description: 'Changes the search_decisions tool description sent to the AI. Strict makes it mandatory, relaxed leaves it to the AI\'s judgment.',
@@ -437,14 +444,14 @@ export default function HomePage() {
                     </p>
                 </section>
 
-                {/* CLI + MCP */}
+                {/* CLI + MCP + UI */}
                 <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-b border-white/5 relative z-10">
-                    <h2 className="text-2xl font-bold text-white mb-3 text-center">Two interfaces, one store</h2>
+                    <h2 className="text-2xl font-bold text-white mb-3 text-center">Three interfaces, one store</h2>
                     <p className="text-zinc-500 text-center mb-12 max-w-2xl mx-auto">
-                        The CLI is for you and your AI. The MCP server is for your AI and you. Both read and write to the same local data.
+                        CLI for terminal control. MCP server for your AI. Web UI for visualization. All three read and write to the same local store.
                     </p>
 
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="grid md:grid-cols-3 gap-6">
                         <div className="bento-card p-6 group hover:border-primary-500/30 transition-colors">
                             <div className="flex items-start gap-4">
                                 <div className="w-12 h-12 rounded-xl bg-primary-500/10 border border-primary-500/20 flex items-center justify-center text-primary-400 flex-shrink-0">
@@ -479,6 +486,23 @@ export default function HomePage() {
                                     </p>
                                     <Link to="/docs/mcp" className="text-xs text-zinc-500 hover:text-primary-400 transition-colors">
                                         MCP Server docs →
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bento-card p-6 group hover:border-accent-500/30 transition-colors">
+                            <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-accent-500/10 border border-accent-500/20 flex items-center justify-center text-accent-400 flex-shrink-0">
+                                    <Eye className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-white mb-1">Web UI</h3>
+                                    <p className="text-zinc-400 text-sm mb-3">
+                                        <code className="text-accent-400">decide ui</code> launches a local interface with three views — graph, vector space, and list. Live MCP pulse animates AI activity.
+                                    </p>
+                                    <Link to="/docs/cli#web-ui" className="text-xs text-zinc-500 hover:text-accent-400 transition-colors">
+                                        UI commands →
                                     </Link>
                                 </div>
                             </div>

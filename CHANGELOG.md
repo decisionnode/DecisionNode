@@ -2,6 +2,33 @@
 
 All notable changes to DecisionNode are documented here.
 
+## [0.6.0] - 2026-04-16
+
+### Added
+- **`decide ui`** — local web UI for visualizing decisions. Three views, all backed by the same store and filter state:
+    - **Graph view** — force-directed (Cytoscape.js + fcose), nodes are decisions, edges are cosine similarity. 3D-orb node styling with bloom glow, Obsidian-style hover-fade. Adjustable similarity threshold via slider.
+    - **Vector Space view** — UMAP projection of the 3072-dim Gemini embeddings into 2D, drawn as actual vectors radiating from origin with axes and 3D-orb tips. Pan, zoom, and click to select.
+    - **List view** — searchable, filterable, sortable cards grouped by scope. The boring-but-essential view for actually reading decisions.
+- **Live MCP pulse** — when an AI client (Claude Code, Cursor, Windsurf, Antigravity, Cline, etc.) calls `search_decisions`, the matched nodes pulse in real time with that client's attribution color via SSE. New lightweight append-only `pulses.jsonl` log avoids polluting `activity.json` with read-only events.
+- **Live CLI updates** — adding/editing/deleting decisions in another terminal animates into the UI immediately (file watching via `fs.watch`).
+- **Project switcher modal** — searchable, sortable, paginated picker. Replaces the old dropdown.
+- **Shared filter bar** — text + status filters apply to all three views simultaneously. Switch views, the filter follows.
+- **Side panel** with full per-decision activity timeline, color-coded by source (cli / mcp:claude-code / mcp:cursor / etc.).
+- **PNG export** — download or copy current view to clipboard at 3× DPI for sharing.
+- **First-run tour** — 5-step modal explains the views, filter bar, click-to-select, live MCP pulse, and keyboard shortcuts.
+- **Background mode** — `decide ui -d` (or `--detach`) spawns the UI as a detached process and returns the terminal. `decide ui status` and `decide ui stop` for daemon management.
+- New module `src/pulse.ts` for lightweight read-only event logging from the MCP server.
+
+### Changed
+- README, CLI reference docs, and decisionnode-cli.md updated with all the new `ui` subcommands.
+- Default node colors now drawn from the brand palette (shades of primary cyan + accent yellow) instead of a generic rainbow.
+
+### Tech notes
+- New devDependencies: `esbuild`, `preact`, `cytoscape`, `cytoscape-fcose`, `umap-js`, `tailwindcss`, `@tailwindcss/cli`. All bundled at build time — zero new runtime dependencies.
+- New build step: `scripts/build-ui.mjs` (esbuild + tailwindcss + html copy).
+- Bundled UI ships in `dist/ui/` inside the npm tarball.
+- HTTP server uses Node's built-in `http` module — no Express, no extra runtime deps.
+
 ## [0.5.3] - 2026-04-11
 
 ### Added

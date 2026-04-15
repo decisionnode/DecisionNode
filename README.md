@@ -84,9 +84,33 @@ decide activate ui-003              # bring it back
 decide check                        # embedding health
 decide embed                        # fix missing embeddings
 decide export json > decisions.json # export to file
+decide ui                           # launch local web UI (graph + vector space + list)
+decide ui -d                        # run UI in background, return the terminal
+decide ui stop                      # stop the background UI
 ```
 
 ## Features
+
+### `decide ui` — visual interface
+
+A local web UI that gives you three live perspectives on your decisions:
+
+- **Graph** — force-directed view where nodes are decisions, edges are cosine similarity. Hover to highlight a decision's neighborhood, drag the threshold slider to tighten/loosen the connections.
+- **Vector Space** — UMAP projection of the 3072-dim Gemini embeddings into 2D, drawn as actual vectors radiating from the origin. Lets you literally see semantic clusters form.
+- **List** — searchable, filterable, sortable cards grouped by scope. The boring-but-essential view for actually reading what you've stored.
+
+Live MCP pulse: when Claude Code, Cursor, Windsurf, or any MCP client searches your decisions, the matched nodes pulse in real time in the matching tool's color. You're literally watching the AI think.
+
+```bash
+decide ui            # foreground (Ctrl+C to stop)
+decide ui -d         # background (terminal returns immediately)
+decide ui status     # check whether the background server is running
+decide ui stop       # stop the background server
+```
+
+Local-only HTTP server on `localhost:7788` (falls back to a random port). Read-only — the CLI and MCP remain the write paths.
+
+### Other features
 
 <details>
 <summary><strong>History tracking</strong> — full audit trail with source tracking</summary>

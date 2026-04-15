@@ -96,23 +96,27 @@ export default function DocsIntroduction() {
                 </div>
             </Section>
 
-            <Section title="Two interfaces" id="two-interfaces">
+            <Section title="Three interfaces" id="three-interfaces">
                 <div className="space-y-4 text-zinc-400">
                     <p>
-                        DecisionNode has two interfaces that share the same data:
+                        DecisionNode has three interfaces that share the same local store:
                     </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                         <div className="bg-zinc-900/50 p-5 rounded-lg border border-zinc-800">
-                            <p className="text-zinc-200 font-semibold mb-2">CLI — for you and your AI</p>
+                            <p className="text-zinc-200 font-semibold mb-2">CLI — for you</p>
                             <p className="text-sm">The <code>decide</code> command. Use it to set up projects, add decisions, search, export/import, check embedding health, and configure settings. Supports interactive prompts or <Link to="/docs/cli#core-commands" className="text-primary-400 hover:underline">one-command inline flags</Link>.</p>
                         </div>
                         <div className="bg-zinc-900/50 p-5 rounded-lg border border-zinc-800">
-                            <p className="text-zinc-200 font-semibold mb-2">MCP server — for your AI and you</p>
+                            <p className="text-zinc-200 font-semibold mb-2">MCP server — for your AI</p>
                             <p className="text-sm">The <code>decide-mcp</code> binary. Connect it once (e.g. <code>claude mcp add decisionnode -s user decide-mcp</code> for Claude Code) and the AI calls tools like <code>search_decisions</code> and <code>add_decision</code> over <a href="https://modelcontextprotocol.io" className="text-primary-400 hover:underline" target="_blank" rel="noopener noreferrer">MCP</a>. Works with Claude Code, Cursor, Windsurf, Antigravity, or any MCP-compliant tool.</p>
+                        </div>
+                        <div className="bg-zinc-900/50 p-5 rounded-lg border border-zinc-800">
+                            <p className="text-zinc-200 font-semibold mb-2">Web UI — for visualization</p>
+                            <p className="text-sm">Run <code>decide ui</code> to launch a local web interface with three views: a <strong className="text-zinc-200">force-directed graph</strong>, a <strong className="text-zinc-200">vector space</strong> (UMAP projection of the 3072-dim embeddings), and a <strong className="text-zinc-200">searchable list</strong>. When an AI client searches via MCP, matched nodes pulse live in that client's color. Read-only — CLI and MCP remain the write paths.</p>
                         </div>
                     </div>
                     <p className="text-sm mt-4">
-                        Both read and write to the same store (<code>~/.decisionnode/</code>). The CLI handles setup and maintenance (init, setup, embed, clean, export, import, config). The MCP server handles the AI's workflow (search, add, update, delete) with structured JSON input/output and <Link to="/docs/context#conflict-detection" className="text-primary-400 hover:underline">automatic conflict detection</Link>. See the <Link to="/docs/mcp#setup" className="text-primary-400 hover:underline">MCP setup guide</Link> to connect your AI client.
+                        All three read and write to the same store (<code>~/.decisionnode/</code>). The CLI handles setup and maintenance, the MCP server handles the AI's workflow with structured JSON and <Link to="/docs/context#conflict-detection" className="text-primary-400 hover:underline">automatic conflict detection</Link>, and the Web UI gives you a visual layer over both. See the <Link to="/docs/mcp#setup" className="text-primary-400 hover:underline">MCP setup guide</Link> to connect your AI client.
                     </p>
                 </div>
             </Section>

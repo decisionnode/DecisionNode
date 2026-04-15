@@ -12,10 +12,11 @@ decide setup   # configure Gemini API key (free tier)
 decide add     # add your first decision
 ```
 
-## Two interfaces
+## Three interfaces
 
 - **CLI (`decide` or `decisionnode`)** — for you. Add, search, list, edit, deprecate, export/import, configure.
-- **MCP server (`decide-mcp`)** — for your AI. `decide init` creates `.mcp.json` so AI clients connect automatically.
+- **MCP server (`decide-mcp`)** — for your AI. AI clients connect via MCP and read/write decisions through 9 tools.
+- **Web UI (`decide ui`)** — local visualization. Three views (graph / vector space / list) with a live MCP pulse that animates AI activity in real time. Read-only; CLI and MCP remain the write paths. `decide ui -d` runs it in the background.
 
 ## Documentation
 

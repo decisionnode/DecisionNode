@@ -167,6 +167,10 @@ async function main() {
                 await handleDeleteScope();
                 break;
 
+            case 'ui':
+                await handleUi();
+                break;
+
             default:
                 printUsage();
                 break;
@@ -2036,6 +2040,265 @@ async function handleFetch(): Promise<void> {
     }
 }
 
+interface UiDaemonState {
+    pid: number;
+    port: number;
+    url: string;
+    startedAt: string;
+}
+
+function getUiStateFile(): string {
+    const home = process.env.HOME || process.env.USERPROFILE || '';
+    return path.join(home, '.decisionnode', '.ui-daemon.json');
+}
+
+async function readUiDaemonState(): Promise<UiDaemonState | null> {
+    try {
+        const content = await fs.readFile(getUiStateFile(), 'utf-8');
+        return JSON.parse(content) as UiDaemonState;
+    } catch {
+        return null;
+    }
+}
+
+function isPidAlive(pid: number): boolean {
+    try {
+        process.kill(pid, 0);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+async function writeUiDaemonState(state: UiDaemonState): Promise<void> {
+    const file = getUiStateFile();
+    await fs.mkdir(path.dirname(file), { recursive: true });
+    await fs.writeFile(file, JSON.stringify(state, null, 2), 'utf-8');
+}
+
+async function clearUiDaemonState(): Promise<void> {
+    try {
+        await fs.unlink(getUiStateFile());
+    } catch {
+        // Ignore
+    }
+}
+
+async function openBrowser(url: string): Promise<void> {
+    const { spawn } = await import('node:child_process');
+    const opener =
+        process.platform === 'win32' ? 'start' :
+        process.platform === 'darwin' ? 'open' : 'xdg-open';
+    try {
+        spawn(opener, [url], {
+            detached: true,
+            stdio: 'ignore',
+            shell: process.platform === 'win32',
+        }).unref();
+    } catch {
+        // Ignore — URL is printed for manual copy
+    }
+}
+
+async function handleUi() {
+    // Parse flags
+    let port: number | undefined;
+    let noOpen = false;
+    let detach = false;
+    let stop = false;
+    let status = false;
+    let internalDaemon = false;
+    for (let i = 1; i < args.length; i++) {
+        const arg = args[i];
+        if (arg === '--no-open') {
+            noOpen = true;
+        } else if (arg === '-d' || arg === '--detach') {
+            detach = true;
+        } else if (arg === 'stop' || arg === '--stop') {
+            stop = true;
+        } else if (arg === 'status' || arg === '--status') {
+            status = true;
+        } else if (arg === '--background') {
+            // Internal flag used when spawned by --detach
+            internalDaemon = true;
+        } else if (arg === '--port' && args[i + 1]) {
+            const parsed = Number.parseInt(args[i + 1], 10);
+            if (!Number.isNaN(parsed)) port = parsed;
+            i++;
+        }
+    }
+
+    // ─── stop: kill the running daemon ─────────────────
+    if (stop) {
+        const state = await readUiDaemonState();
+        if (!state) {
+            console.log(`\n  ${c.dim}No UI server running.${c.reset}\n`);
+            return;
+        }
+        if (!isPidAlive(state.pid)) {
+            await clearUiDaemonState();
+            console.log(`\n  ${c.dim}No UI server running (stale state cleared).${c.reset}\n`);
+            return;
+        }
+        try {
+            process.kill(state.pid);
+            await clearUiDaemonState();
+            console.log(`\n  ${c.green}✓${c.reset} Stopped UI server ${c.dim}(pid ${state.pid}, was at ${state.url})${c.reset}\n`);
+        } catch (err) {
+            console.error(`\n  ${c.red}✗${c.reset} Failed to stop: ${(err as Error).message}\n`);
+            process.exit(1);
+        }
+        return;
+    }
+
+    // ─── status: show current daemon state ────────────
+    if (status) {
+        const state = await readUiDaemonState();
+        if (!state) {
+            console.log(`\n  ${c.dim}UI server:${c.reset} not running\n`);
+            return;
+        }
+        if (!isPidAlive(state.pid)) {
+            await clearUiDaemonState();
+            console.log(`\n  ${c.dim}UI server:${c.reset} not running ${c.dim}(stale state cleared)${c.reset}\n`);
+            return;
+        }
+        const uptimeMs = Date.now() - new Date(state.startedAt).getTime();
+        const uptimeMin = Math.floor(uptimeMs / 60000);
+        console.log(`\n  ${c.green}✓${c.reset} UI server running`);
+        console.log(`    ${c.dim}URL:${c.reset}     ${c.cyan}${state.url}${c.reset}`);
+        console.log(`    ${c.dim}PID:${c.reset}     ${state.pid}`);
+        console.log(`    ${c.dim}Uptime:${c.reset}  ${uptimeMin}m\n`);
+        return;
+    }
+
+    // ─── detach: spawn self as background daemon ──────
+    if (detach) {
+        const existing = await readUiDaemonState();
+        if (existing && isPidAlive(existing.pid)) {
+            console.log(`\n  ${c.yellow}!${c.reset} UI server already running at ${c.cyan}${existing.url}${c.reset}`);
+            console.log(`  ${c.dim}Stop it with:${c.reset} ${c.cyan}decisionnode ui stop${c.reset}\n`);
+            return;
+        }
+        if (existing) {
+            // Stale state — clear it
+            await clearUiDaemonState();
+        }
+
+        banner();
+        console.log('');
+        console.log(`  ${c.dim}Starting UI server in background…${c.reset}`);
+
+        const { spawn } = await import('node:child_process');
+        const childArgs = ['ui', '--background', '--no-open'];
+        if (port !== undefined) childArgs.push('--port', String(port));
+
+        const child = spawn(process.execPath, [process.argv[1], ...childArgs], {
+            detached: true,
+            stdio: 'ignore',
+            windowsHide: true,
+        });
+        child.unref();
+
+        // Wait for the daemon to write its state file (up to 5s)
+        const deadline = Date.now() + 5000;
+        let state: UiDaemonState | null = null;
+        while (Date.now() < deadline) {
+            state = await readUiDaemonState();
+            if (state && isPidAlive(state.pid)) break;
+            await new Promise((r) => setTimeout(r, 150));
+        }
+
+        if (!state) {
+            console.error(`\n  ${c.red}✗${c.reset} UI server failed to start within 5s.\n`);
+            process.exit(1);
+        }
+
+        console.log('');
+        console.log(`  ${c.green}✓${c.reset} UI running in background at ${c.cyan}${state.url}${c.reset}`);
+        console.log(`  ${c.dim}Stop with:${c.reset} ${c.cyan}decisionnode ui stop${c.reset}`);
+        console.log(`  ${c.dim}Status with:${c.reset} ${c.cyan}decisionnode ui status${c.reset}\n`);
+
+        if (!noOpen) {
+            await openBrowser(state.url);
+        }
+        return;
+    }
+
+    // ─── foreground (or internal background daemon) ───
+    // Check if one is already running; refuse to start a second one
+    const existing = await readUiDaemonState();
+    if (existing && isPidAlive(existing.pid)) {
+        if (!internalDaemon) {
+            banner();
+            console.log('');
+            console.log(`  ${c.yellow}!${c.reset} UI server already running at ${c.cyan}${existing.url}${c.reset}`);
+            console.log(`  ${c.dim}Stop it first with:${c.reset} ${c.cyan}decisionnode ui stop${c.reset}\n`);
+            return;
+        }
+        // If we're the detached child and state already exists with a live PID,
+        // something is odd — exit quietly so we don't double-run
+        process.exit(1);
+    }
+
+    const { startUiServer } = await import('./ui/server.js');
+
+    if (!internalDaemon) {
+        banner();
+        console.log('');
+        console.log(`  ${c.dim}Starting UI server…${c.reset}`);
+    }
+
+    let handle;
+    try {
+        handle = await startUiServer({ port });
+    } catch (err) {
+        if (!internalDaemon) {
+            console.error(`\n  ${c.red}✗${c.reset} Failed to start UI server: ${(err as Error).message}\n`);
+        }
+        process.exit(1);
+    }
+
+    // Record the running daemon state — used by --stop/--status/--detach
+    const portMatch = handle.url.match(/:(\d+)$/);
+    const actualPort = portMatch ? Number.parseInt(portMatch[1], 10) : 0;
+    await writeUiDaemonState({
+        pid: process.pid,
+        port: actualPort,
+        url: handle.url,
+        startedAt: new Date().toISOString(),
+    });
+
+    if (!internalDaemon) {
+        console.log('');
+        console.log(`  ${c.green}✓${c.reset} UI ready at ${c.cyan}${handle.url}${c.reset}`);
+        console.log(`  ${c.dim}Press Ctrl+C to stop${c.reset}\n`);
+
+        if (!noOpen) {
+            await openBrowser(handle.url);
+        }
+    }
+
+    const shutdown = async () => {
+        if (!internalDaemon) {
+            console.log(`\n  ${c.dim}Shutting down…${c.reset}`);
+        }
+        try {
+            await handle.close();
+        } catch {
+            // Ignore
+        }
+        await clearUiDaemonState();
+        process.exit(0);
+    };
+
+    process.on('SIGINT', () => void shutdown());
+    process.on('SIGTERM', () => void shutdown());
+
+    // Keep process alive
+    await new Promise(() => {});
+}
+
 function printUsage() {
     banner();
     console.log('');
@@ -2064,6 +2327,12 @@ function printUsage() {
     console.log(`    ${c.cyan}history${c.reset}               ${c.dim}View activity log${c.reset}`);
     console.log(`    ${c.cyan}projects${c.reset}              ${c.dim}List all projects${c.reset}`);
     console.log(`    ${c.cyan}config${c.reset}                ${c.dim}View/set configuration${c.reset}`);
+    console.log('');
+    console.log(`  ${c.bold}${c.white}Visualization${c.reset}`);
+    console.log(`    ${c.cyan}ui${c.reset} ${c.gray}[--port N] [--no-open]${c.reset}      ${c.dim}Launch local web UI (graph + vector space)${c.reset}`);
+    console.log(`    ${c.cyan}ui${c.reset} ${c.gray}-d${c.reset}                         ${c.dim}Run the UI in the background (detach from terminal)${c.reset}`);
+    console.log(`    ${c.cyan}ui stop${c.reset}                       ${c.dim}Stop a background UI server${c.reset}`);
+    console.log(`    ${c.cyan}ui status${c.reset}                     ${c.dim}Show whether the UI server is running${c.reset}`);
     console.log('');
     console.log(`  ${c.dim}Global decisions use the ${c.reset}${c.yellow}global:${c.reset}${c.dim} prefix (e.g., ${c.reset}${c.yellow}global:ui-001${c.reset}${c.dim})${c.reset}`);
     console.log(`  ${c.dim}Docs: ${c.cyan}https://decisionnode.dev/docs${c.reset}`);

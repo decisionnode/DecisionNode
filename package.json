@@ -1,6 +1,6 @@
 {
   "name": "decisionnode",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "Record structured decisions once, search them from all your AI coding tools — a shared structured semantic memory store across Claude Code, Cursor, Windsurf, Antigravity, and every MCP client.",
   "keywords": [
     "decisions",
@@ -38,7 +38,9 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/build-ui.mjs",
+    "build:ts": "tsc",
+    "build:ui": "node scripts/build-ui.mjs",
     "dev": "tsc --watch",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -53,9 +55,17 @@
     "dotenv": "^17.2.3"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "@types/cytoscape": "^3.21.9",
     "@types/node": "^20.19.27",
+    "cytoscape": "^3.33.2",
+    "cytoscape-fcose": "^2.2.0",
+    "esbuild": "^0.27.7",
+    "preact": "^10.29.1",
     "sharp": "^0.34.5",
+    "tailwindcss": "^4.2.2",
     "typescript": "^5.3.3",
+    "umap-js": "^1.4.0",
     "vitest": "^4.1.2"
   }
 }

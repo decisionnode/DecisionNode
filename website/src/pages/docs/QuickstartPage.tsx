@@ -94,6 +94,16 @@ decide init`} />
                         Restart Claude Code after running this. Your AI can now call <code>search_decisions</code> before writing code and <code>add_decision</code> when you agree on a new approach. For other clients, see the <Link to="/docs/mcp#setup" className="text-primary-400 hover:underline">MCP setup guide</Link>.
                     </p>
                 </Step>
+
+                <Step title="Visualize it">
+                    <p className="mb-3">
+                        Launch the local web UI to see your decisions as a graph, a 2D vector space, and a searchable list:
+                    </p>
+                    <CodeBlock code="decide ui" />
+                    <p className="mt-3">
+                        The UI auto-opens at <code>http://localhost:7788</code>. When your AI client searches via MCP, matched decisions pulse live in that client's color. Use <code>decide ui -d</code> to run it in the background and reclaim your terminal.
+                    </p>
+                </Step>
             </Steps>
 
             <Section title="What's Next?">

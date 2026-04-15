@@ -105,6 +105,25 @@ export default function CliReferencePage() {
         },
     ];
 
+    const uiCommands = [
+        {
+            cmd: "decide ui [--port N] [--no-open]",
+            desc: "Launch the local web UI in the foreground. Three views: graph (force-directed similarity), vector space (UMAP projection of embeddings), and list. Live MCP pulse animates AI activity in real time. Defaults to port 7788, falls back to a random port if taken. Press Ctrl+C to stop."
+        },
+        {
+            cmd: "decide ui -d  /  decide ui --detach",
+            desc: "Run the UI server in the background and return your terminal immediately. Tracked via ~/.decisionnode/.ui-daemon.json. Combine with --port and --no-open."
+        },
+        {
+            cmd: "decide ui status",
+            desc: "Show whether the background UI server is running. Reports the URL, PID, and uptime."
+        },
+        {
+            cmd: "decide ui stop",
+            desc: "Stop a running background UI server. Cleans up the daemon state file."
+        },
+    ];
+
     return (
         <>
         <Helmet>
@@ -149,6 +168,20 @@ decisionnode add    # same thing`} />
             <Section title="Data & Maintenance" id="data-maintenance">
                 <div className="space-y-4">
                     {dataCommands.map((c) => (
+                        <div key={c.cmd} className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-5">
+                            <code className="text-primary-400 font-bold text-sm">{c.cmd}</code>
+                            <p className="text-zinc-400 text-sm mt-2">{c.desc}</p>
+                        </div>
+                    ))}
+                </div>
+            </Section>
+
+            <Section title="Web UI" id="web-ui">
+                <p className="text-zinc-400 mb-4">
+                    A local web interface for browsing and visualizing your decisions. Three views — graph, vector space, and list — share the same selection state and filter bar. Live MCP pulse animates which decisions the AI is touching in real time. Read-only — the CLI and MCP remain the write paths.
+                </p>
+                <div className="space-y-4">
+                    {uiCommands.map((c) => (
                         <div key={c.cmd} className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-5">
                             <code className="text-primary-400 font-bold text-sm">{c.cmd}</code>
                             <p className="text-zinc-400 text-sm mt-2">{c.desc}</p>

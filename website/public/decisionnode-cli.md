@@ -56,6 +56,14 @@ decide history                        # View activity log
 decide history --filter cli           # Filter by source (cli, mcp, cloud)
 decide config                         # View/set configuration
 decide projects                       # List all initialized projects
+
+# Web UI (graph + vector space + list)
+decide ui                             # Launch local UI in foreground (Ctrl+C to stop)
+decide ui -d                          # Launch in background, return the terminal
+decide ui --port 7788                 # Pick a specific port
+decide ui --no-open                   # Don't auto-open the browser
+decide ui status                      # Show whether the background server is running
+decide ui stop                        # Stop the background server
 ```
 
 ---

@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme {
+    /* Void base — matches website */
+    --color-background: #050505;
+
+    /* Custom Zinc scale */
+    --color-zinc-850: #1f1f22;
+
+    /* Primary — Electric Blue */
+    --color-primary-50: #f0f9ff;
+    --color-primary-100: #e0f2fe;
+    --color-primary-200: #bae6fd;
+    --color-primary-300: #7dd3fc;
+    --color-primary-400: #38bdf8;
+    --color-primary-500: #0ea5e9;
+    --color-primary-600: #0284c7;
+    --color-primary-700: #0369a1;
+    --color-primary-800: #075985;
+    --color-primary-900: #0c4a6e;
+
+    /* Accent — Yellow */
+    --color-accent-300: #fde047;
+    --color-accent-400: #facc15;
+    --color-accent-500: #eab308;
+    --color-accent-600: #ca8a04;
+
+    /* Fonts */
+    --font-sans: "Inter", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", Menlo, monospace;
+}
+
+html, body, #app {
+    height: 100%;
+    margin: 0;
+    font-family: var(--font-sans);
+}
+
+body {
+    background: var(--color-background);
+    color: white;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Grid pattern background (matches website hero) */
+.bg-grid-pattern {
+    background-image:
+        linear-gradient(to right, #1f1f22 1px, transparent 1px),
+        linear-gradient(to bottom, #1f1f22 1px, transparent 1px);
+    background-size: 4rem 4rem;
+}
+
+/* Brand glow animation */
+@keyframes glow-pulse {
+    0%, 100% {
+        opacity: 0.15;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.25;
+        transform: scale(1.05);
+    }
+}
+.animate-glow-pulse {
+    animation: glow-pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Slide-up entrance */
+@keyframes slide-up {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up {
+    animation: slide-up 0.5s ease-out forwards;
+}
+
+/* Fade-in */
+@keyframes fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+.animate-fade-in {
+    animation: fade-in 0.7s ease-out forwards;
+}
+
+/* Custom scrollbar for bounded panels (side-panel activity log, etc.) */
+.sidepanel-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #3f3f46 transparent;
+}
+.sidepanel-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+.sidepanel-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sidepanel-scroll::-webkit-scrollbar-thumb {
+    background: #3f3f46;
+    border-radius: 3px;
+}
+.sidepanel-scroll::-webkit-scrollbar-thumb:hover {
+    background: #52525b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}

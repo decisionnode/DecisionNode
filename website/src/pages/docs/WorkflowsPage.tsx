@@ -149,6 +149,22 @@ decide clean`} />
                     </video>
                 </div>
             </Section>
+
+            <Section title="Visualizing your decisions" id="visualizing">
+                <p className="text-zinc-400 mb-4">
+                    Run <code>decide ui</code> to launch a local web interface that gives you three views over the same store: a force-directed <strong className="text-zinc-200">graph</strong> (decisions linked by semantic similarity), a 2D <strong className="text-zinc-200">vector space</strong> (UMAP projection of the 3072-dim Gemini embeddings), and a searchable <strong className="text-zinc-200">list</strong>. When an MCP client (Claude Code, Cursor, Windsurf, etc.) calls <code>search_decisions</code>, matched nodes pulse live in that client's color — you literally watch the AI think. CLI mutations (add / edit / delete) animate in too.
+                </p>
+                <CodeBlock code={`# Foreground (Ctrl+C to stop)
+decide ui
+
+# Background — return the terminal immediately
+decide ui -d
+decide ui status
+decide ui stop`} />
+                <p className="text-zinc-400 mt-4 text-sm">
+                    The UI is read-only. The CLI and MCP server remain the only write paths into the store. Local-only HTTP server on <code>localhost:7788</code> with a fallback to a random port if it's taken.
+                </p>
+            </Section>
         </div>
         </>
     );

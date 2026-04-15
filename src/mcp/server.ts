@@ -12,6 +12,7 @@ import {
 import { findRelevantDecisions, findPotentialConflicts } from '../ai/rag.js';
 import { isEmbeddingAvailable } from '../ai/gemini.js';
 import { getHistory, getSnapshot, getDecisionsFromSnapshot } from '../history.js';
+import { logPulse } from '../pulse.js';
 import { addDecision, updateDecision, deleteDecision, listDecisions, getDecisionById, getNextDecisionId, importDecisions, listProjects, listGlobalDecisions, addGlobalDecision, getNextGlobalDecisionId, getGlobalDecisionById, updateGlobalDecision, deleteGlobalDecision } from '../store.js';
 import { DecisionNode } from '../types.js';
 import { getProjectRoot, getCurrentProject, setCurrentProject, GLOBAL_STORE, isGlobalId, stripGlobalPrefix } from '../env.js';
@@ -313,6 +314,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             }
 
             const results = await findRelevantDecisions(query, limit);
+
+            // Log as a pulse event so the web UI can animate the matches
+            if (results.length > 0) {
+                void logPulse({
+                    kind: 'searched',
+                    decisionIds: results.map((r) => r.decision.id),
+                    source: getMcpSource(),
+                    query,
+                });
+            }
 
             return {
                 content: [

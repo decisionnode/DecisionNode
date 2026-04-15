@@ -305,6 +305,24 @@ All commands work with both `decide` and `decisionnode`.
 | `decide projects` | List all projects |
 | `decide config` | View/set configuration |
 
+### Web UI
+
+A local web UI for visualizing and browsing decisions. Three views (graph, vector space, list) backed by the same store, with a live MCP pulse that animates AI activity in real time. Read-only — the CLI and MCP remain the write paths.
+
+| Command | Description |
+|---------|-------------|
+| `decide ui [--port N] [--no-open]` | Launch local web UI in foreground (Ctrl+C to stop). Defaults to `http://localhost:7788`. |
+| `decide ui -d` / `decide ui --detach` | Run the UI in the background and return your terminal immediately. |
+| `decide ui status` | Show whether the background UI server is running (URL, PID, uptime). |
+| `decide ui stop` | Stop the background UI server. |
+
+The three views:
+- **Graph** — force-directed network where nodes are decisions and edges connect decisions whose embeddings are semantically similar. Adjustable similarity threshold via slider.
+- **Vector Space** — UMAP projection of the 3072-dim Gemini embeddings into 2D, drawn as actual vectors radiating from origin. Watch semantic clusters form.
+- **List** — searchable, filterable cards grouped by scope.
+
+When an MCP client (Claude Code, Cursor, Windsurf, Antigravity, Cline, etc.) calls `search_decisions`, matched nodes pulse in the UI in real time with that client's attribution color. CLI mutations (add/edit/delete) also animate live via file watching.
+
 ---
 
 ## MCP Tools (9)
