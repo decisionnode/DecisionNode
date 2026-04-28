@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/decisionnode-decisionnode-badge.png)](https://mseep.ai/app/decisionnode-decisionnode)
+
 <p align="center">
   <img src="website/src/assets/images/DecisionNode-transparent.png" width="150" />
 </p>
